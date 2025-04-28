@@ -23,5 +23,7 @@ module OnlineBookstore
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    config.paths.add 'app/api', eager_load: true
   end
 end
