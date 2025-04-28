@@ -1,4 +1,6 @@
 # app/api/base_api.rb
+require_relative 'users_api'
+
 class BaseApi < Grape::API
   format :json
   prefix :api  # So all routes will start with /api
@@ -7,4 +9,5 @@ class BaseApi < Grape::API
     { message: 'Hello from Grape API!' }
   end
 
+  mount UsersAPI
 end
