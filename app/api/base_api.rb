@@ -1,5 +1,6 @@
 # app/api/base_api.rb
 require_relative 'users_api'
+require_relative 'auth_api'
 
 class BaseApi < Grape::API
   format :json
@@ -10,4 +11,5 @@ class BaseApi < Grape::API
   end
 
   mount UsersAPI
+  mount AuthAPI  # <<< Mount your Auth API here
 end
