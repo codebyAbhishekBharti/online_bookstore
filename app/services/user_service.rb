@@ -23,4 +23,21 @@ class UserService
     )
     user  # Return created user object
   end
+
+  def self.update_user_details(user_id, params)
+    user = User.find_by(id: user_id)
+    raise "User not found" unless user
+
+    # Update user details
+    allowed_params = [ :name, :email, :phone_number, :password, :address, :role ]
+    filtered_params = params.slice(*allowed_params)
+
+    if filtered_params[:password]
+      # Ensure password is hashed if updated
+      filtered_params[:password] = BCrypt::Password.create(filtered_params[:password])
+    end
+
+    user.update!(filtered_params)
+    user  # Return updated user object
+  end
 end
