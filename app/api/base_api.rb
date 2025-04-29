@@ -1,15 +1,13 @@
 # app/api/base_api.rb
 
 class BaseApi < Grape::API
+  prefix :api
   format :json
-  prefix :api  # So all routes will start with /api
 
   get :hello do
-    { message: 'Hello from Grape API!' }
+    { message: "Hello from Grape API Root Base!" }
   end
 
-  mount V1::AuthApi
-  mount V1::UsersApi
-  mount V1::BookApi
-  mount V2::BookApi
+  mount V1::Base
+  mount V2::Base
 end

@@ -1,8 +1,7 @@
 # app/api/v1/book_api.rb
 module V1
   class BookApi < Grape::API
-    version "v1", using: :path  # Add versioning
-    format :json
+
     resource :book do
       desc "Entry a new book"
       params do
