@@ -27,15 +27,28 @@ class BookService
     )
     book
   end
+
+  def self.get_book_by_id(id)
+    # Finding the book by ID
+    book = Book.find_by(id: id)
+    # Check if the book exists
+    raise "Book not found" unless book
+    book  # Return the book object
+  rescue ActiveRecord::RecordNotFound => e
+    raise "Book not found: #{e.message}"
+  rescue StandardError => e
+    raise "An error occurred: #{e.message}"
+  end
+
   def self.update_book_details(user_id, params)
     # Finding the book by ID
-    book = Book.find_by(id: params[:id])
+    book = self.get_book_by_id(params[:id])
+    # Check if the book exists
+    raise "Book not found" unless book
     # check if user is vendor of that book
     if book.vendor_id != user_id
       raise "User is not authorized to update this book"
     end
-    # Check if the book exists
-    raise "Book not found" unless book
     # Updating book details
     allowed_params = [:title, :author, :price, :description, :stock_quantity, :category_name]
     filtered_params = params.slice(*allowed_params)
@@ -45,6 +58,25 @@ class BookService
     raise "Book not found: #{e.message}"
   rescue ActiveRecord::RecordInvalid => e
     raise "Failed to update book: #{e.message}"
+  rescue StandardError => e
+    raise "An error occurred: #{e.message}"
+  end
+
+  def self.delete_book(user_id, params)
+    # Finding the book by ID
+    book = self.get_book_by_id(params[:id])
+    # Check if the book exists
+    raise "Book not found" unless book
+    # check if user is vendor of that book
+    if book.vendor_id != user_id
+      raise "User is not authorized to delete this book"
+    end
+    # Deleting the book record
+    book.destroy!
+  rescue ActiveRecord::RecordNotFound => e
+    raise "Book not found: #{e.message}"
+  rescue ActiveRecord::RecordInvalid => e
+    raise "Failed to delete book: #{e.message}"
   rescue StandardError => e
     raise "An error occurred: #{e.message}"
   end

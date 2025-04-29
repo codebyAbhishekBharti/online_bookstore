@@ -49,6 +49,29 @@ module V1
         error!({ status: :failed, message: "Unable to update book details", error: e.message }, 409)
       end
 
+      desc "Delete a book"
+      before do
+        require_vendor!
+      end
+      params do
+        requires :id, type: Integer, desc: "Book ID"
+      end
+      delete do
+        response = BookService.delete_book(current_user.id, params)
+        if response
+          present :status, :success
+          present :data, response
+        else
+          error!({ status: :failed, message: "Unable to delete book", error: "Delete operation failed" }, 500)
+        end
+      rescue ActiveRecord::RecordNotFound => e
+        error!({ status: :failed, message: "Book not found", error: e.message }, 404)
+      rescue ActiveRecord::RecordInvalid => e
+        error!({ status: :failed, message: "Failed to delete book", error: e.message }, 422)
+      rescue StandardError => e
+        error!({ status: :failed, message: "An error occurred", error: e.message }, 500)
+      end
+
       desc "Get all books"
       before do
         authenticate_user!
