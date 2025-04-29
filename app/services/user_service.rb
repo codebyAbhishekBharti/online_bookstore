@@ -32,11 +32,6 @@ class UserService
     allowed_params = [ :name, :email, :phone_number, :password, :address, :role ]
     filtered_params = params.slice(*allowed_params)
 
-    if filtered_params[:password]
-      # Ensure password is hashed if updated
-      filtered_params[:password] = BCrypt::Password.create(filtered_params[:password])
-    end
-
     user.update!(filtered_params)
     user  # Return updated user object
   end
