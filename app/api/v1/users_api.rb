@@ -6,7 +6,7 @@ module V1
     resource :users do
       desc "Create new user (No authentication required)"
       post do
-        response = V1::UserService.create_new_user(params)
+        response = UserService.create_new_user(params)
         present :status, :success
         present :data, response
       rescue => e
@@ -18,7 +18,7 @@ module V1
         authenticate_user!
       end
       get do
-        response = V1::UserService.get_all_users
+        response = UserService.get_all_users
         if response
           present :status, :success
           present :data, response
@@ -31,9 +31,17 @@ module V1
       before do
         authenticate_user!
       end
+      params do
+        optional :name, type: String, desc: "User name"
+        optional :email, type: String, desc: "User email"
+        optional :phone_number, type: String, desc: "User phone number"
+        optional :address, type: String, desc: "User address"
+        optional :role, type: String, desc: "User role (e.g., admin, user)"
+        optional :password, type: String, desc: "User password"
+      end
       patch do
         user_id = current_user.id
-        response = V1::UserService.update_user_details(user_id, params)
+        response = UserService.update_user_details(user_id, params)
         if response
           present :status, :success
           present :data, response
