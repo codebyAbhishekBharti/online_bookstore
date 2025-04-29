@@ -11,4 +11,8 @@ module AuthHelper
   def authenticate_user!
     error!({ status: :failed, message: 'Unauthorized Access' }, 401) unless current_user
   end
+
+  def require_vendor!
+    error!({ status: :unauthorized, message: "Access restricted to vendors only" }, 403) unless current_user.role == "vendor"
+  end
 end

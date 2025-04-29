@@ -6,7 +6,7 @@ module V1
     resource :book do
       desc "Entry a new book"
       before do
-        authenticate_user!
+        require_vendor!
       end
       params do
         requires :title, type: String, desc: "User title"
@@ -26,7 +26,7 @@ module V1
 
       desc "Update book details"
       before do
-        authenticate_user!
+        require_vendor!
       end
       params do
         requires :id, type: Integer, desc: "Book ID"
