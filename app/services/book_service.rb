@@ -80,4 +80,67 @@ class BookService
   rescue StandardError => e
     raise "An error occurred: #{e.message}"
   end
+
+  def self.search_books_by_title(title)
+    # Searching for books by title
+    books = Book.where("title LIKE ?", "%#{title}%")
+    if books.empty?
+      raise "No books found with the title: #{title}"
+    end
+    books  # Return the list of books
+  rescue StandardError => e
+    raise "An error occurred: #{e.message}"
+  end
+
+  def self.search_books_by_author(author)
+    # Searching for books by author
+    books = Book.where("author LIKE ?", "%#{author}%")
+    if books.empty?
+      raise "No books found by the author: #{author}"
+    end
+    books  # Return the list of books
+  rescue StandardError => e
+    raise "An error occurred: #{e.message}"
+  end
+
+  def self.search_books_by_title_and_author(title, author)
+    # Searching for books by title and author
+    books = Book.where("title LIKE ? AND author LIKE ?", "%#{title}%", "%#{author}%")
+    if books.empty?
+      raise "No books found with the title: #{title} and author: #{author}"
+    end
+    books  # Return the list of books
+  rescue StandardError => e
+    raise "An error occurred: #{e.message}"
+  end
+
+  def self.search_books_by_category(category_name)
+    # Searching for books by category name
+    books = Book.where("category_name LIKE ?", "%#{category_name}%")
+    if books.empty?
+      raise "No books found in the category: #{category_name}"
+    end
+    books  # Return the list of books
+  rescue StandardError => e
+    raise "An error occurred: #{e.message}"
+  end
+
+  def self.search_books(params)
+    # Searching for books based on the provided parameters
+    title = params[:title]
+    author = params[:author]
+    category = params[:category]
+
+    books = Book.all
+    books = books.where("title ILIKE ?", "%#{title}%") if title.present?
+    books = books.where("author ILIKE ?", "%#{author}%") if author.present?
+    books = books.where("category_name ILIKE ?", "%#{category}%") if category.present?
+
+    if books.empty?
+      raise "No books found with the provided search criteria"
+    end
+    books  # Return the list of books
+  rescue StandardError => e
+    raise "An error occurred: #{e.message}"
+  end
 end

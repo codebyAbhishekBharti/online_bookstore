@@ -80,11 +80,36 @@ module V1
         response = BookService.get_all_books
           present :status, :success
           present :data, response
-      end
       rescue => e
           error!({ status: :failed, message: "Unable to fetch data from DB", error: e }, 500)
       end
 
-      
+      desc "Search books"
+      before do
+        authenticate_user!
+      end
+      params do
+        optional :title, type: String, desc: "Book title"
+        optional :author, type: String, desc: "Book author"
+        optional :category, type: String, desc: "Book category"
+      end
+      post :search do
+        puts "Search parameters: #{params.inspect}"
+        if params[:title].blank? && params[:author].blank? && params[:category].blank?
+          error!({ status: :failed, message: "At least one search parameter (title, author, category) is required" }, 400)
+        end
+
+        response = BookService.search_books(params)
+
+        if response.present?
+          present :status, :success
+          present :data, response
+        else
+          error!({ status: :failed, message: "No books found matching criteria" }, 404)
+        end
+      rescue => e
+        error!({ status: :failed, message: "Error while searching books", error: e.message }, 500)
+      end
+    end
   end
 end
