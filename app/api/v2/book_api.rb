@@ -9,7 +9,7 @@ module V2
       params do
       end
       post do
-        "2nd version kaam kar raha hai bhai"
+        V2::BookService.hello
       end
     end
   end

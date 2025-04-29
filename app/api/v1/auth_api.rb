@@ -28,7 +28,7 @@ module V1
         requires :role, type: String, desc: "User role (e.g., admin, user)"
       end
       post :signup do
-        user = UserService.create_new_user(params)
+        user = V1::UserService.create_new_user(params)
         if user && user.authenticate(user.password)
           token = JsonWebToken.encode(user_id: user.id)
           { status: :success, token: token, user: user }
