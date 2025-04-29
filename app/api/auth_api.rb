@@ -12,7 +12,7 @@ class AuthAPI < Grape::API
       # return user
       if user && user.authenticate(params[:password])
         token = JsonWebToken.encode(user_id: user.id)
-        { status: :success, token: token, user: { id: user.id, email: user.email } }
+        { status: :success, token: token, user: { id: user.id, email: user.email, role: user.role } }
       else
         error!({ status: :failed, message: "Invalid email or password" }, 401)
       end
