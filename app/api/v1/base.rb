@@ -7,5 +7,6 @@ module V1
     mount V1::AuthApi
     mount V1::UsersApi
     mount V1::BookApi
+    mount V1::CartsApi
   end
 end

@@ -50,7 +50,7 @@ class BookService
       raise "User is not authorized to update this book"
     end
     # Updating book details
-    allowed_params = [:title, :author, :price, :description, :stock_quantity, :category_name]
+    allowed_params = [ :title, :author, :price, :description, :stock_quantity, :category_name ]
     filtered_params = params.slice(*allowed_params)
     book.update!(filtered_params)
     book  # Return updated book object
