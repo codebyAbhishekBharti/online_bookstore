@@ -8,5 +8,6 @@ module V1
     mount V1::UsersApi
     mount V1::BookApi
     mount V1::CartsApi
+    mount V1::AddressApi
   end
 end
