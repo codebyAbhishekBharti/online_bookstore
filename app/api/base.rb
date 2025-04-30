@@ -1,6 +1,6 @@
-# app/api/base_api.rb
+# app/api/base.rb
 
-class BaseApi < Grape::API
+class Base < Grape::API
   prefix :api
   format :json
 

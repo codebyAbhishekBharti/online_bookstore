@@ -1,6 +1,6 @@
 
 module V1
-  class UsersApi < Grape::API
+  class Users < Grape::API
     helpers AuthHelper
 
     resource :users do

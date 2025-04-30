@@ -4,10 +4,10 @@ module V1
     version 'v1', using: :path
     format :json
     
-    mount V1::AuthApi
-    mount V1::UsersApi
-    mount V1::BookApi
-    mount V1::CartsApi
-    mount V1::AddressApi
+    mount V1::Auth
+    mount V1::Users
+    mount V1::Book
+    mount V1::Carts
+    mount V1::Address
   end
 end

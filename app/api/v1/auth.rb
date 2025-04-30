@@ -1,7 +1,7 @@
 require 'json_web_token'
 
 module V1
-  class AuthApi < Grape::API
+  class Auth < Grape::API
     helpers AuthHelper
     resource :auth do
       desc "Login User and return JWT token"

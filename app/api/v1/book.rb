@@ -1,6 +1,6 @@
-# app/api/v1/book_api.rb
+# app/api/v1/book.rb
 module V1
-  class BookApi < Grape::API
+  class Book < Grape::API
     helpers AuthHelper
 
     resource :book do

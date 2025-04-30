@@ -1,7 +1,7 @@
 require 'json_web_token'
 
 module V1
-  class AddressApi < Grape::API
+  class Address < Grape::API
     helpers AuthHelper
 
     resource :address do

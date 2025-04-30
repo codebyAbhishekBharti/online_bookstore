@@ -4,6 +4,6 @@ module V2
     version 'v2', using: :path
     format :json
 
-    mount V2::BookApi
+    mount V2::Book
   end
 end

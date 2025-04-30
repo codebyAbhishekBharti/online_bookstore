@@ -1,12 +1,12 @@
 
 module V2
-  class BookApi < Grape::API
+  class Book < Grape::API
     resource :book do
       desc "Entry a new book"
       params do
       end
       post do
-        V2::BookService.hello
+        "version 2 book api working"
       end
     end
   end

@@ -1,7 +1,7 @@
 require 'json_web_token'
 
 module V1
-  class CartsApi < Grape::API
+  class Carts < Grape::API
     helpers AuthHelper
 
     resource :cart do
