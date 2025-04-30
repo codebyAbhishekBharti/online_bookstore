@@ -2,6 +2,7 @@ require 'json_web_token'
 
 module V1
   class AuthApi < Grape::API
+    helpers AuthHelper
     resource :auth do
       desc "Login User and return JWT token"
       params do
@@ -13,7 +14,7 @@ module V1
         # return user
         if user && user.authenticate(params[:password])
           token = JsonWebToken.encode(user_id: user.id)
-          { status: :success, token: token, user: { id: user.id, email: user.email, role: user.role } }
+          { status: :success, token: token, user: { id: user.id, name: user.name, email: user.email, role: user.role } }
         else
           error!({ status: :failed, message: "Invalid email or password" }, 401)
         end
@@ -37,6 +38,20 @@ module V1
         end
       rescue => e
         error!({ status: :failed, message: "Unable to create new user", error: e.message }, 409)
+      end
+
+      before do
+        authenticate_user!
+      end
+      get :me do
+        user = current_user
+        puts user
+        if user
+          present :status, :success
+          present :data, user
+        else
+          error!({ status: :failed, message: "User not found" }, 404)
+        end
       end
     end
   end
