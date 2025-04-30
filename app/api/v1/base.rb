@@ -9,5 +9,6 @@ module V1
     mount V1::Book
     mount V1::Carts
     mount V1::Address
+    mount V1::ShipmentAddress
   end
 end
