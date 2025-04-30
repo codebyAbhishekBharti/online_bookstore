@@ -15,6 +15,7 @@ class ShipmentAddressService
       country: params[:country],
       address_type: params[:address_type],
     )
+    address  # Return created address object
   end
 
   def self.update_address(id, params)
