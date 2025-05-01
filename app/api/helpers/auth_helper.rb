@@ -1,11 +1,15 @@
 # app/api/helpers/auth_helper.rb
 module AuthHelper
   def current_user
-    token = headers['Authorization']&.split(' ')&.last
-    return nil unless token
+    return @current_user if defined?(@current_user)
 
-    decoded = JsonWebToken.decode(token)
-    @current_user ||= User.find_by(id: decoded[:user_id]) if decoded
+    token = headers['Authorization']&.split(' ')&.last
+    @current_user = nil
+    if token
+      decoded = JsonWebToken.decode(token)
+      @current_user = User.find_by(id: decoded[:user_id]) if decoded
+    end
+    @current_user
   end
 
   def authenticate_user!
@@ -13,6 +17,12 @@ module AuthHelper
   end
 
   def require_vendor!
-    error!({ status: :unauthorized, message: "Access restricted to vendors only" }, 403) unless current_user.role == "vendor"
+    unless current_user
+      error!({ status: :unauthorized, message: "Unauthorized" }, 401)
+    end
+
+    unless current_user.role == "vendor"
+      error!({ status: :unauthorized, message: "Access restricted to vendors only" }, 403)
+    end
   end
 end
