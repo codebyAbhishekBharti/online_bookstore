@@ -126,7 +126,6 @@ class BookService
   end
 
   def self.search_books(params)
-    # Searching for books based on the provided parameters
     title = params[:title]
     author = params[:author]
     category = params[:category]
@@ -136,11 +135,6 @@ class BookService
     books = books.where("author ILIKE ?", "%#{author}%") if author.present?
     books = books.where("category_name ILIKE ?", "%#{category}%") if category.present?
 
-    if books.empty?
-      raise "No books found with the provided search criteria"
-    end
-    books  # Return the list of books
-  rescue StandardError => e
-    raise "An error occurred: #{e.message}"
+    books.to_a  # Always return an array, even if empty
   end
 end

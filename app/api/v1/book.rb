@@ -94,22 +94,18 @@ module V1
         optional :category, type: String, desc: "Book category"
       end
       post :search do
-        puts "Search parameters: #{params.inspect}"
         if params[:title].blank? && params[:author].blank? && params[:category].blank?
           error!({ status: :failed, message: "At least one search parameter (title, author, category) is required" }, 400)
         end
 
-        response = BookService.search_books(params)
+        books = BookService.search_books(params)
 
-        if response.present?
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "No books found matching criteria" }, 404)
-        end
+        present :status, :success
+        present :data, books
       rescue => e
         error!({ status: :failed, message: "Error while searching books", error: e.message }, 500)
       end
+
     end
   end
 end
