@@ -32,10 +32,13 @@ class ShipmentAddressService
   def self.delete_address(id)
     # Find the cart item
     address =  ShipmentAddress.find_by(id: id)
-    if address.nil?
-      raise "address not found"
-    end
+    raise ActiveRecord::RecordNotFound, "Address not found" if address.nil?
     # Delete the cart item
     address.destroy
+  end
+
+  def self.get_address_by_id(id)
+    address = ShipmentAddress.find_by(id: id)
+    address
   end
 end

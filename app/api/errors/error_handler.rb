@@ -45,6 +45,14 @@ module ErrorHandler
       }, 422)
     end
 
+    rescue_from ActiveRecord::RecordNotDestroyed do |e|
+      error!({
+        tatus: "failed",
+        message: e.message,
+        error: (e.cause&.message || e.message)
+      },422)
+    end
+
     rescue_from :all do |e|
       error!({
         status: "failed",

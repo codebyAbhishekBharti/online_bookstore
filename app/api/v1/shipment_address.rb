@@ -2,10 +2,12 @@ module V1
   class ShipmentAddress < Grape::API
     helpers AuthHelper
 
-    before do
-      authenticate_user!
-    end
+    
     resource :shipment_address do
+      before do
+        authenticate_user!
+      end
+
       desc 'Get shipment address'
       get do
         response = ShipmentAddressService.get_all_addresses
@@ -14,6 +16,20 @@ module V1
           present :data, response
         else
           error!({ status: :failed, message: "Unable to fetch shipment address", error: "No addresses found" }, 404)
+        end
+      end
+
+      desc "Get shipment address by ID"
+      params do
+        requires :id, type: Integer, desc: "Shipment address ID"
+      end
+      get ':id' do
+        response = ShipmentAddressService.get_address_by_id(params[:id])
+        if response
+          present :status, :success
+          present :data, response
+        else
+          raise ActiveRecord::RecordNotFound, "Shipment address not found"
         end
       end
 
@@ -41,6 +57,20 @@ module V1
         error!({ status: :failed, message: "Unable to create shipment address", error: e.message }, 409)
       end
 
+      desc "delete shipment address"
+      params do
+        requires :id, type: Integer, desc: "Shipment address ID"
+      end
+      delete ':id' do
+        response = ShipmentAddressService.delete_address(params[:id])
+        if response
+          present :status, :success
+          present :data, response
+        else
+          raise ActiveRecord::RecordNotDestroyed, "Shipment address not deleted"
+        end
+      end
+
       desc 'Update shipment address'
       params do
         requires :id, type: Integer, desc: "Shipment address ID"
@@ -64,22 +94,6 @@ module V1
         end
       rescue => e
         error!({ status: :failed, message: "Unable to update shipment address", error: e.message }, 409)
-      end
-
-      desc 'Delete shipment address'
-      params do
-        requires :id, type: Integer, desc: "Shipment address ID"
-      end
-      delete do
-        response = ShipmentAddressService.delete_address(params[:id])
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Unable to delete shipment address", error: "Delete operation failed" }, 500)
-        end
-      rescue => e
-        error!({ status: :failed, message: "Unable to delete shipment address", error: e.message }, 409)
       end
     end
   end
