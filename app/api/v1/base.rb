@@ -10,5 +10,7 @@ module V1
     mount V1::Carts
     mount V1::Address
     mount V1::ShipmentAddress
+    mount V1::Order
+    mount V1::OrderItems
   end
 end

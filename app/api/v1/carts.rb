@@ -1,5 +1,4 @@
-require 'json_web_token'
-
+# app/api/v1/carts_api.rb
 module V1
   class Carts < Grape::API
     helpers AuthHelper
@@ -17,8 +16,10 @@ module V1
         response = CartsService.add_item_to_cart(current_user.id, params)
         present :status, :success
         present :data, response
-      rescue => e
-        error!({ status: :failed, message: "Unable to add item to cart", error: e.message }, 409)
+      # rescue => e
+      #   raise PG::UniqueViolation, "Unable trt"
+        # raise ActiveRecord::RecordNotFound, "Unable to add item to casdfasdfart"
+        # error!({ status: :failed, message: "Unable to add item to cartssss", error: e.message }, 409)
       end
 
       desc "Get all items in the cart"
@@ -31,10 +32,11 @@ module V1
           present :status, :success
           present :data, response
         else
-          error!({ status: :failed, message: "Unable to fetch cart items", error: "No items found" }, 404)
+          raise ActiveRecord::RecordNotFound, "No items found"
+          # error!({ status: :failed, message: "Unable to fetch cart items", error: "No items found" }, 404)
         end
-      rescue => e
-        error!({ status: :failed, message: "Unable to fetch cart items", error: e.message }, 409)
+      # rescue => e
+        # error!({ status: :failed, message: "Unable to fetch cart items", error: e.message }, 409)
       end
 
       desc "Delete an item from the cart"

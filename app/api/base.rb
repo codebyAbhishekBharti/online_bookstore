@@ -1,6 +1,7 @@
 # app/api/base.rb
 
 class Base < Grape::API
+  include ErrorHandler
   prefix :api
   format :json
 

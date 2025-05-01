@@ -27,5 +27,6 @@ module OnlineBookstore
     config.paths.add "app/api", eager_load: true
     config.autoload_paths << Rails.root.join("app", "lib")
     config.autoload_paths << Rails.root.join("app/api/helpers")
+    config.autoload_paths << Rails.root.join("app/api/errors")
   end
 end

@@ -26,7 +26,6 @@ class CartsService
 
   def self.get_cart_items(user_id)
     cart_items = Cart.where(user_id: user_id)
-    raise "No items found in the cart" if cart_items.empty?
     cart_items
   end
 
