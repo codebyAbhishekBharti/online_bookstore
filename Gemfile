@@ -70,3 +70,8 @@ group :test do
 end
 
 gem "pundit", "~> 2.5"
+
+
+group :development, :test do
+  gem 'rspec-rails'
+end
