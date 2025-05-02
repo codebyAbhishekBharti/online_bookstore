@@ -12,5 +12,6 @@ module V1
     mount V1::ShipmentAddress
     mount V1::Order
     mount V1::OrderItems
+    mount V1::Email
   end
 end
