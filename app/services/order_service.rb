@@ -1,3 +1,5 @@
+require 'sidekiq/api'
+
 class OrderService
   def self.hello
     "hello from order service"
@@ -68,9 +70,7 @@ class OrderService
       end
 
     end
-    
-    # Enqueue the email job for Sidekiq to send the email asynchronously
-    OrderConfirmationEmailJob.perform_later(user_id, {
+    params = {
       order_id: order.id,
       total_amount: total_amount,
       shipment_address: {
@@ -84,7 +84,13 @@ class OrderService
         country: address.country
       },
       order_items: cart_items.map { |item| { book_id: item[:book_id], quantity: item[:quantity], price: item[:price] } }
-    })
+    }
+    # Enqueue the email job for Sidekiq to send the email asynchronously
+    if Sidekiq::Queue.new("default").size <= 500
+      OrderConfirmationEmailJob.perform_later(user_id, params)
+    else
+      self.send_order_confirmation_email(user_id, params)
+    end
     return order
   end
 
