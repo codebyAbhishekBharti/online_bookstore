@@ -69,7 +69,8 @@ class OrderService
 
     end
     
-    send_order_confirmation_email(user_id, {
+    # Enqueue the email job for Sidekiq to send the email asynchronously
+    OrderConfirmationEmailJob.perform_later(user_id, {
       order_id: order.id,
       total_amount: total_amount,
       shipment_address: {
