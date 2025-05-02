@@ -35,7 +35,7 @@ class OrderService
     end
 
     ActiveRecord::Base.transaction do
-      # Create shipment address (assume this is a DB write)
+      # Create shipment address
       shipment_address = ShipmentAddressService.create_address(address)
       raise ActiveRecord::RecordNotFound, "Shipment address not found" unless shipment_address
 
@@ -47,16 +47,16 @@ class OrderService
         status: "pending"
       )
 
-      # Create order items
+      # Create order items with order_id instead of order_group_id
       cart_items.each do |item|
         OrderItemsService.create_order_item(user_id, {
-          order_group_id: order.order_group_id,
+          order_id: order.id,
           book_id: item[:book_id],
           quantity: item[:quantity]
         })
       end
 
-      # Reduce stock quantities
+      # Reduce stock
       cart_items.each do |item|
         book = Book.find_by(id: item[:book_id])
         raise ActiveRecord::RecordNotFound, "Book not found" unless book
@@ -68,8 +68,8 @@ class OrderService
       cart_items.each do |item|
         CartsService.delete_cart_item(user_id, { id: item[:id] })
       end
-
     end
+
     params = {
       order_id: order.id,
       total_amount: total_amount,
@@ -97,13 +97,12 @@ class OrderService
   def self.send_order_confirmation_email(user_id, params)
     # Logic for sending order confirmation email
     user = User.find_by(id: user_id)
-    raise ActiveRecord::RecordNotFound, "User not found" unless user_id
+    raise ActiveRecord::RecordNotFound, "User not found" unless user
     OrderMailer.order_confirmation_email(user.email, params).deliver_now
   end
 
   def self.get_all_orders(user_id)
-    orders = Order.where(user_id: user_id)
-    orders
+    Order.where(user_id: user_id)
   end
 
   def self.get_order_details(user_id, order_id)
@@ -121,12 +120,12 @@ class OrderService
     order = self.get_order_details(user_id, order_id)
     raise ActiveRecord::RecordNotFound, "Order not found" unless order
 
-    if order.status == "shipped" || order.status == "delivered"
+    if order.status.in?(%w[shipped delivered])
       raise ActiveRecord::RecordNotSaved, "Cannot delete shipped or delivered orders"
     end
 
     ActiveRecord::Base.transaction do
-      order_items = OrderItemsService.get_order_items_by_order_group_id(order.order_group_id)
+      order_items = OrderItemsService.get_order_items_by_order_id(order.id)
 
       order_items.each do |order_item|
         book = Book.find_by(id: order_item.book_id)

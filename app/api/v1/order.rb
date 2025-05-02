@@ -1,9 +1,8 @@
-# app/api/v1/order_api.rb
-
+# app/api/v1/order.rb
 module V1
   class Order < Grape::API
     helpers AuthHelper
-    
+
     resource :order do
       before do
         authenticate_user!
@@ -20,7 +19,7 @@ module V1
           present :status, :success
           present :data, response
         else
-          raise ActiveRecord::RecordNotSaved, "Order creation failed"
+          error!({ status: :failed, message: "Order creation failed", error: "Unable to create order" }, 500)
         end
       end
 
@@ -31,7 +30,7 @@ module V1
           present :status, :success
           present :data, response
         else
-          raise ActiveRecord::RecordNotFound, "No orders found"
+          error!({ status: :failed, message: "No orders found", error: "No orders available" }, 404)
         end
       end
 
@@ -40,12 +39,12 @@ module V1
         requires :id, type: Integer, desc: "Order ID"
       end
       get ':id' do
-        response = OrderService.get_order_by_id(current_user.id, params[:id])
+        response = OrderService.get_order_details(current_user.id, params[:id])
         if response
           present :status, :success
           present :data, response
         else
-          raise ActiveRecord::RecordNotFound, "Order not found"
+          error!({ status: :failed, message: "Order not found", error: "No such order" }, 404)
         end
       end
 
@@ -67,7 +66,7 @@ module V1
           present :status, :success
           present :data, response
         else
-          raise ActiveRecord::RecordNotSaved, "Order update failed"
+          error!({ status: :failed, message: "Order update failed", error: "Unable to update order" }, 500)
         end
       end
 
@@ -81,10 +80,9 @@ module V1
           present :status, :success
           present :data, response
         else
-          raise ActiveRecord::RecordNotFound, "Order deletion failed"
+          error!({ status: :failed, message: "Order deletion failed", error: "Unable to delete order" }, 404)
         end
       end
-
     end
   end
 end

@@ -4,10 +4,11 @@ module V1
     before do
       authenticate_user!
     end
+
     resource :order_items do
       desc "Create a new order item"
       params do
-        requires :order_group_id, type: Integer, desc: "Order ID"
+        requires :order_id, type: Integer, desc: "Order ID"
         requires :book_id, type: Integer, desc: "Book ID"
         requires :quantity, type: Integer, desc: "Quantity of the book"
       end
@@ -39,17 +40,8 @@ module V1
         requires :id, type: Integer, desc: "Order Item ID"
       end
       get ':id' do
-        response = OrderItemsService.get_order_item_details(current_user.id, params[:id])
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Unable to fetch order item details", error: "Item not found" }, 404)
-        end
-      rescue => e
-        error!({ status: :failed, message: "Unable to fetch order item details", error: e.message }, 409)
+        OrderItemsService.get_order_item(params[:id])  # Updated to use order item id directly
       end
-
     end
   end
 end
