@@ -35,4 +35,11 @@ class UserService
     user.update!(filtered_params)
     user  # Return updated user object
   end
+
+  def self.get_user_by_id(user_id)
+    user = User.find_by(id: user_id)
+    raise ActiveRecord::RecordNotFound, "User not found" unless user
+    user
+  end
+
 end
