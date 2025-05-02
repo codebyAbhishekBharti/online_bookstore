@@ -14,12 +14,9 @@ module V1
       end
       post do
         response = CartsService.add_item_to_cart(current_user.id, params)
+        raise ActiveRecord::RecordNotFound, "Unable to add item to cart" if response.blank?
         present :status, :success
         present :data, response
-      # rescue => e
-      #   raise PG::UniqueViolation, "Unable trt"
-        # raise ActiveRecord::RecordNotFound, "Unable to add item to casdfasdfart"
-        # error!({ status: :failed, message: "Unable to add item to cartssss", error: e.message }, 409)
       end
 
       desc "Get all items in the cart"
@@ -28,15 +25,9 @@ module V1
       end
       get do
         response = CartsService.get_cart_items(current_user.id)
-        if response
-          present :status, :success
-          present :data, response
-        else
-          raise ActiveRecord::RecordNotFound, "No items found"
-          # error!({ status: :failed, message: "Unable to fetch cart items", error: "No items found" }, 404)
-        end
-      # rescue => e
-        # error!({ status: :failed, message: "Unable to fetch cart items", error: e.message }, 409)
+        raise ActiveRecord::RecordNotFound, "No items found" if response.blank?
+        present :status, :success
+        present :data, response
       end
 
       desc "Delete an item from the cart"
@@ -47,15 +38,7 @@ module V1
         requires :id, type: Integer, desc: "Cart Item ID"
       end
       delete do
-        response = CartsService.delete_cart_item(current_user.id, params)
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Unable to delete cart item", error: "Delete operation failed" }, 500)
-        end
-      rescue => e
-        error!({ status: :failed, message: "Unable to delete cart item", error: e.message }, 409)
+        CartsService.delete_cart_item(current_user.id, params)
       end
 
       desc "Update an item in the cart"

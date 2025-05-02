@@ -11,10 +11,9 @@ module V1
       desc "Get all books"
       get do
         response = BookService.get_all_books
+        raise ActiveRecord::RecordNotFound, "No books found" if response.blank?
           present :status, :success
           present :data, response
-      rescue => e
-          error!({ status: :failed, message: "Unable to fetch data from DB", error: e }, 500)
       end
 
       desc "Search books"
@@ -29,11 +28,9 @@ module V1
         end
 
         books = BookService.search_books(params)
-
+        raise ActiveRecord::RecordNotFound, "No books found" if books.blank?
         present :status, :success
         present :data, books
-      rescue => e
-        error!({ status: :failed, message: "Error while searching books", error: e.message }, 500)
       end
       
       resource :vendor do
@@ -69,14 +66,10 @@ module V1
         end
         patch do
           response = BookService.update_book_details(current_user.id, params)
-          if response
-            present :status, :success
-            present :data, response
-          else
-            error!({ status: :failed, message: "Unable to update book details", error: "Update operation failed" }, 500)
-          end
-        rescue => e
-          error!({ status: :failed, message: "Unable to update book details", error: e.message }, 409)
+          raise ActiveRecord::RecordNotFound, "Book not found" if response.blank?
+          raise ActiveRecord::RecordInvalid, "Book update failed" unless response.valid?
+          present :status, :success
+          present :data, response
         end
 
         desc "Delete a book"
@@ -85,18 +78,8 @@ module V1
         end
         delete do
           response = BookService.delete_book(current_user.id, params)
-          if response
-            present :status, :success
-            present :data, response
-          else
-            error!({ status: :failed, message: "Unable to delete book", error: "Delete operation failed" }, 500)
-          end
-        rescue ActiveRecord::RecordNotFound => e
-          error!({ status: :failed, message: "Book not found", error: e.message }, 404)
-        rescue ActiveRecord::RecordInvalid => e
-          error!({ status: :failed, message: "Failed to delete book", error: e.message }, 422)
-        rescue StandardError => e
-          error!({ status: :failed, message: "An error occurred", error: e.message }, 500)
+          present :status, :success
+          present :data, response
         end
       end
     end

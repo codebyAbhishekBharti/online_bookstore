@@ -63,23 +63,21 @@ class BookService
   end
 
   def self.delete_book(user_id, params)
-    # Finding the book by ID
+    # Find the book by ID
     book = self.get_book_by_id(params[:id])
+  
     # Check if the book exists
-    raise "Book not found" unless book
-    # check if user is vendor of that book
-    if book.vendor_id != user_id
-      raise "User is not authorized to delete this book"
+    raise ActiveRecord::RecordNotFound, "Book not found" unless book
+  
+    # Check if the user is the vendor of the book
+    unless book.vendor_id == user_id
+      raise StandardError, "User is not authorized to delete this book"
     end
-    # Deleting the book record
+  
+    # Attempt to destroy the book
     book.destroy!
-  rescue ActiveRecord::RecordNotFound => e
-    raise "Book not found: #{e.message}"
-  rescue ActiveRecord::RecordInvalid => e
-    raise "Failed to delete book: #{e.message}"
-  rescue StandardError => e
-    raise "An error occurred: #{e.message}"
   end
+  
 
   def self.search_books_by_title(title)
     # Searching for books by title

@@ -9,7 +9,7 @@ class UserService
     missing_params = required_params.select { |param| params[param].nil? }
 
     if missing_params.any?
-      raise "Missing required params: #{missing_params.join(', ')}"
+      raise ActiveRecord::RecordInvalid, "Missing required params: #{missing_params.join(', ')}"
     end
 
     # Proceed with user creation

@@ -27,7 +27,7 @@ module V1
           present :status, :success
           present :data, response
         else
-          error!({ status: :failed, message: "Failed to add address", error: "Address creation failed" }, 500)
+          error!({ status: :failed, message: "Failed to add address", error: "Address creation failed" }, 409)
         end
       rescue => e
         error!({ status: :failed, message: "Failed to add address", error: e.message }, 409)

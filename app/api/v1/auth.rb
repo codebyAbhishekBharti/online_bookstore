@@ -11,14 +11,15 @@ module V1
       end
       post :login do
         user = User.find_by(email: params[:email])
-        # return user
+
         if user && user.authenticate(params[:password])
           token = JsonWebToken.encode(user_id: user.id)
           { status: :success, token: token, user: { id: user.id, name: user.name, email: user.email, role: user.role } }
         else
-          error!({ status: :failed, message: "Invalid email or password" }, 401)
+          raise UnauthorizedError, "Invalid email or password"
         end
       end
+
       desc "Create User and return JWT token"
       params do
         requires :name, type: String, desc: "User name"
@@ -34,10 +35,8 @@ module V1
           token = JsonWebToken.encode(user_id: user.id)
           { status: :success, token: token, user: user }
         else
-          error!({ status: :failed, message: "Missing fields" }, 401)
+          raise ActiveRecord::RecordInvalid, "User creation failed"
         end
-      rescue => e
-        error!({ status: :failed, message: "Unable to create new user", error: e.message }, 409)
       end
 
       before do
@@ -45,12 +44,11 @@ module V1
       end
       get :me do
         user = current_user
-        puts user
         if user
           present :status, :success
           present :data, user
         else
-          error!({ status: :failed, message: "User not found" }, 404)
+          raise ActiveRecord::RecordNotFound, "User not found"
         end
       end
     end

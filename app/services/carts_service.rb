@@ -20,8 +20,8 @@ class CartsService
     user_id: user_id,
     book_id: book_id,
     quantity: quantity
-  )
-  cart_item
+    )
+    cart_item
   end
 
   def self.get_cart_items(user_id)

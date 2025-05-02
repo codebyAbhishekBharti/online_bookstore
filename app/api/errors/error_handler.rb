@@ -1,5 +1,8 @@
 # Define custom error class
 class MissingParameterError < StandardError; end
+class UnauthorizedError < StandardError; end
+class RuntimeError < StandardError; end
+
 
 module ErrorHandler
   extend ActiveSupport::Concern
@@ -16,12 +19,36 @@ module ErrorHandler
     rescue_from PG::UniqueViolation do |e|
       error!({
         status: "failed",
-        message: e.message,
+        message: "Unique constraint violation",
         error: (e.cause&.message || e.message)
       }, 409) # 409 Conflict is more semantically correct
     end
 
     rescue_from ActiveRecord::RecordNotSaved do |e|
+      error!({
+        status: "failed",
+        message: e.message,
+        error: (e.cause&.message || e.message)
+      }, 422)
+    end
+
+    rescue_from UnauthorizedError do |e|
+      error!({
+        status: "failed",
+        message: e.message,
+        error: (e.cause&.message || e.message)
+      }, 401)
+    end
+
+    rescue_from RuntimeError do |e|
+      error!({
+        status: "failed",
+        message: e.message,
+        error: (e.cause&.message || e.message)
+      }, 422)
+    end
+
+    rescue_from StandardError do |e|
       error!({
         status: "failed",
         message: e.message,
@@ -62,3 +89,16 @@ module ErrorHandler
     end
   end
 end
+
+
+# class ErrorHandler
+
+#   def self.Loginerror()
+#     error
+
+# class LoginError < StandardError
+#   def 
+
+#   begin 
+
+#   raise LoginError, "Invalid email or password"
