@@ -32,7 +32,7 @@ module V1
       post :signup do
         user = UserService.create_new_user(params)
         if user && user.authenticate(user.password)
-          token = JsonWebToken.encode(user_id: user.id)
+          token = JsonWebToken.encode({id: user.id, email: user.email,role: user.role})
           { status: :success, token: token, user: user }
         else
           raise ActiveRecord::RecordInvalid, "User creation failed"

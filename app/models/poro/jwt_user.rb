@@ -3,7 +3,7 @@ class JwtUser
   attr_reader :id, :email, :role
 
   def initialize(payload)
-    @id = payload['id']
+    @id = payload['user_id']
     @email = payload['email']
     @role = payload['role']
   end
