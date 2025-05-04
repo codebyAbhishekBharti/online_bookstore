@@ -7,7 +7,7 @@ module AuthHelper
     @current_user = nil
     if token
       decoded = JsonWebToken.decode(token)
-      @current_user = User.find_by(id: decoded[:user_id]) if decoded
+      @current_user = decoded if decoded
     end
     @current_user
   end

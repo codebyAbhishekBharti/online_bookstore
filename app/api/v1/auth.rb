@@ -13,11 +13,11 @@ module V1
         user = User.find_by(email: params[:email])
 
         if user && user.authenticate(params[:password])
-          token = JsonWebToken.encode(user_id: user.id)
+          token = JsonWebToken.encode({id: user.id, email: user.email,role: user.role})
           { status: :success, token: token, user: { id: user.id, name: user.name, email: user.email, role: user.role } }
         else
           raise UnauthorizedError, "Invalid email or password"
-        end
+        end 
       end
 
       desc "Create User and return JWT token"
