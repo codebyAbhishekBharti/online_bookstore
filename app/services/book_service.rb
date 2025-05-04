@@ -64,6 +64,7 @@ class BookService
 
   def self.delete_book(user_id, params)
     # Find the book by ID
+    puts user_id
     book = self.get_book_by_id(params[:id])
   
     # Check if the book exists
@@ -73,7 +74,14 @@ class BookService
     unless book.vendor_id == user_id
       raise StandardError, "User is not authorized to delete this book"
     end
-  
+
+    # Remove the book's cache from Redis
+    cache_key = "book_#{book.id}"
+    Rails.cache.delete(cache_key)
+
+    # Invalidate search cache that may have included this book
+    invalidate_search_cache(book)
+
     # Attempt to destroy the book
     book.destroy!
   end
@@ -124,15 +132,42 @@ class BookService
   end
 
   def self.search_books(params)
-    title = params[:title]
-    author = params[:author]
-    category = params[:category]
+    title    = params[:title].to_s.downcase.strip
+    author   = params[:author].to_s.downcase.strip
+    category = params[:category].to_s.downcase.strip
+  
+    # Generate a unique cache key based on search parameters
+    cache_key = "search_books_#{Digest::MD5.hexdigest("#{title}_#{author}_#{category}")}"
+  
+    Rails.cache.fetch(cache_key, expires_in: 30.minutes) do
+      books = Book.all
+      books = books.where("title ILIKE ?", "%#{title}%") if title.present?
+      books = books.where("author ILIKE ?", "%#{author}%") if author.present?
+      books = books.where("category_name ILIKE ?", "%#{category}%") if category.present?
+      
+      books.to_a
+    end
+  end
 
-    books = Book.all
-    books = books.where("title ILIKE ?", "%#{title}%") if title.present?
-    books = books.where("author ILIKE ?", "%#{author}%") if author.present?
-    books = books.where("category_name ILIKE ?", "%#{category}%") if category.present?
+  private
 
-    books.to_a  # Always return an array, even if empty
+  # This method invalidates the search cache related to the book.
+  def self.invalidate_search_cache(book)
+    # Let's get the search parameters for the book
+    search_params = [
+      { title: book.title, author: book.author, category: book.category_name },
+      { title: book.title, author: book.author },
+      { title: book.title, category: book.category_name },
+      { author: book.author, category: book.category_name },
+      { title: book.title },
+      { author: book.author },
+      { category: book.category_name }
+    ]
+
+    # For each combination of search parameters, generate the cache key and delete it
+    search_params.each do |params|
+      cache_key = "search_books_#{Digest::MD5.hexdigest(params.to_s)}"
+      Rails.cache.delete(cache_key)
+    end
   end
 end

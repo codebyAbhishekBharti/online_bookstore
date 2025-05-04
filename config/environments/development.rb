@@ -91,5 +91,12 @@ Rails.application.configure do
 
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
+
+  config.cache_store = :redis_cache_store, {
+  url: ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" },
+  namespace: "book_cache"
+  }
+
+
     
 end

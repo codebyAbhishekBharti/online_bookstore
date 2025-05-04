@@ -43,8 +43,7 @@ module V1
         authenticate_user!
       end
       get :me do
-        puts "Current user: #{current_user.inspect}"
-        user = User.find_by(id: current_user["id"])
+        user = User.find_by(id: current_user.id)
         if user
           present :status, :success
           present :data, user
