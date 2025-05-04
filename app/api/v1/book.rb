@@ -51,7 +51,6 @@ module V1
           response = BookService.insert_new_book(current_user.id, params)
           present :status, :success
           present :data, response
-        raise ActiveRecord::RecordNotUnique, "Book already exists"
         end
 
         desc "Update book details"

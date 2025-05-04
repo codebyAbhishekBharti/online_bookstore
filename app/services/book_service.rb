@@ -25,6 +25,10 @@ class BookService
       category_name: category_name,
       vendor_id: user_id
     )
+    
+    #invalidating redis search cache
+    invalidate_search_cache(book)
+
     book
   end
 
@@ -137,7 +141,7 @@ class BookService
     category = params[:category].to_s.downcase.strip
   
     # Generate a unique cache key based on search parameters
-    cache_key = "search_books_#{Digest::MD5.hexdigest("#{title}_#{author}_#{category}")}"
+    cache_key = search_cache_key(title: title, author: author, category: category)
   
     Rails.cache.fetch(cache_key, expires_in: 30.minutes) do
       books = Book.all
@@ -153,7 +157,6 @@ class BookService
 
   # This method invalidates the search cache related to the book.
   def self.invalidate_search_cache(book)
-    # Let's get the search parameters for the book
     search_params = [
       { title: book.title, author: book.author, category: book.category_name },
       { title: book.title, author: book.author },
@@ -163,11 +166,20 @@ class BookService
       { author: book.author },
       { category: book.category_name }
     ]
-
-    # For each combination of search parameters, generate the cache key and delete it
+  
     search_params.each do |params|
-      cache_key = "search_books_#{Digest::MD5.hexdigest(params.to_s)}"
+      cache_key = search_cache_key(title: params[:title], author: params[:author],category: params[:category])
       Rails.cache.delete(cache_key)
     end
+  end
+  
+
+  def self.search_cache_key(title: '', author: '', category: '')
+    normalized = [
+      title.to_s.downcase.strip,
+      author.to_s.downcase.strip,
+      category.to_s.downcase.strip
+    ]
+    "search_books_#{Digest::MD5.hexdigest(normalized.join('_'))}"
   end
 end
