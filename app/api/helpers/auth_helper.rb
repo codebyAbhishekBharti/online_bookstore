@@ -2,12 +2,13 @@
 module AuthHelper
   def current_user
     return @current_user if defined?(@current_user)
-
+  
     token = headers['Authorization']&.split(' ')&.last
     @current_user = nil
+  
     if token
       decoded = JsonWebToken.decode(token)
-      @current_user = decoded if decoded
+      @current_user = JwtUser.new(decoded) if decoded
     end
     @current_user
   end

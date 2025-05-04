@@ -28,6 +28,8 @@ module OnlineBookstore
     config.autoload_paths << Rails.root.join("app", "lib")
     config.autoload_paths << Rails.root.join("app/api/helpers")
     config.autoload_paths << Rails.root.join("app/api/errors")
+    config.autoload_paths << Rails.root.join('app/models/poro')
+
 
     config.active_job.queue_adapter = :sidekiq
 
