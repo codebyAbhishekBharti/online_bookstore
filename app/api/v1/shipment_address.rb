@@ -11,12 +11,8 @@ module V1
       desc 'Get shipment address'
       get do
         response = ShipmentAddressService.get_all_addresses
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Unable to fetch shipment address", error: "No addresses found" }, 404)
-        end
+        present :status, :success
+        present :data, response
       end
 
       desc "Get shipment address by ID"
@@ -25,12 +21,8 @@ module V1
       end
       get ':id' do
         response = ShipmentAddressService.get_address_by_id(params[:id])
-        if response
-          present :status, :success
-          present :data, response
-        else
-          raise ActiveRecord::RecordNotFound, "Shipment address not found"
-        end
+        present :status, :success
+        present :data, response
       end
 
       desc 'Create shipment address'
@@ -47,14 +39,8 @@ module V1
       end
       post do
         response = ShipmentAddressService.create_address(params)
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Unable to create shipment address", error: "Creation failed" }, 500)
-        end
-      rescue => e
-        error!({ status: :failed, message: "Unable to create shipment address", error: e.message }, 409)
+        present :status, :success
+        present :data, response
       end
 
       desc "delete shipment address"
@@ -63,12 +49,8 @@ module V1
       end
       delete ':id' do
         response = ShipmentAddressService.delete_address(params[:id])
-        if response
-          present :status, :success
-          present :data, response
-        else
-          raise ActiveRecord::RecordNotDestroyed, "Shipment address not deleted"
-        end
+        present :status, :success
+        present :data, response
       end
 
       desc 'Update shipment address'
@@ -86,14 +68,8 @@ module V1
       end
       patch do
         response = ShipmentAddressService.update_address(params[:id], params)
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Unable to update shipment address", error: "Update operation failed" }, 500)
-        end
-      rescue => e
-        error!({ status: :failed, message: "Unable to update shipment address", error: e.message }, 409)
+        present :status, :success
+        present :data, response
       end
     end
   end

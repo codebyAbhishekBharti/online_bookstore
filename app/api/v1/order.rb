@@ -15,23 +15,15 @@ module V1
       end
       post do
         response = OrderService.create_order(current_user.id, params)
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Order creation failed", error: "Unable to create order" }, 500)
-        end
+        present :status, :success
+        present :data, response
       end
 
       desc "Get all orders for the user"
       get do
         response = OrderService.get_all_orders(current_user.id)
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "No orders found", error: "No orders available" }, 404)
-        end
+        present :status, :success
+        present :data, response
       end
 
       desc "Get order details by ID"
@@ -40,12 +32,8 @@ module V1
       end
       get ':id' do
         response = OrderService.get_order_details(current_user.id, params[:id])
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Order not found", error: "No such order" }, 404)
-        end
+        present :status, :success
+        present :data, response
       end
 
       desc "Update order address"
@@ -62,12 +50,8 @@ module V1
       end
       patch ':order_id' do
         response = OrderService.update_order_address(current_user.id, params)
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Order update failed", error: "Unable to update order" }, 500)
-        end
+        present :status, :success
+        present :data, response
       end
 
       desc "Delete an order"
@@ -76,12 +60,8 @@ module V1
       end
       delete ':order_id' do
         response = OrderService.delete_order(current_user.id, params[:order_id])
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Order deletion failed", error: "Unable to delete order" }, 404)
-        end
+        present :status, :success
+        present :data, response
       end
     end
   end

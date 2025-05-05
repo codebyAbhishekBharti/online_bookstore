@@ -14,25 +14,15 @@ module V1
       end
       post do
         response = OrderItemsService.create_order_item(current_user.id, params)
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Unable to create order item", error: "Order item creation failed" }, 500)
-        end
+        present :status, :success
+        present :data, response
       end
 
       desc "Get all order items"
       get do
         response = OrderItemsService.get_all_order_items(current_user.id)
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Unable to fetch order items", error: "No items found" }, 404)
-        end
-      rescue => e
-        error!({ status: :failed, message: "Unable to fetch order items", error: e.message }, 409)
+        present :status, :success
+        present :data, response
       end
 
       desc "Get order item details"
@@ -40,7 +30,9 @@ module V1
         requires :id, type: Integer, desc: "Order Item ID"
       end
       get ':id' do
-        OrderItemsService.get_order_item(params[:id])  # Updated to use order item id directly
+        response = OrderItemsService.get_order_item(params[:id])  # Updated to use order item id directly
+        present :status, :success
+        present :data, response
       end
     end
   end

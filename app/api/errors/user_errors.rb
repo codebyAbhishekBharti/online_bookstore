@@ -30,4 +30,10 @@ module UserErrors
       super(msg, status: 403)
     end
   end
+
+  class UpdateFailedError < BaseError
+    def initialize(msg = "Update failed")
+      super(msg, status: 422)
+    end
+  end
 end

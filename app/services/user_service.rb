@@ -32,15 +32,22 @@ class UserService
   end
 
   def self.update_user_details(user_id, params)
-    user = User.find_by(id: user_id)
-    raise "User not found" unless user
+    user = self.get_user_by_id(user_id)
 
     # Update user details
     allowed_params = [ :name, :email, :phone_number, :password, :address, :role ]
     filtered_params = params.slice(*allowed_params)
 
-    user.update!(filtered_params)
-    user  # Return updated user object
+    begin
+      user.update!(filtered_params)
+      user
+    rescue ActiveRecord::RecordInvalid => e
+      raise UserErrors::InvalidParameterError, e.record.errors.full_messages.join(", ")
+    rescue ActiveRecord::RecordNotUnique => e
+      raise UserErrors::DuplicateRecordError, "Email or phone number already exists"
+    rescue => e
+      raise UserErrors::UpdateFailedError, "Failed to update user: #{e.message}"
+    end
   end
 
   def self.get_user_by_id(user_id)

@@ -54,8 +54,7 @@ class BookService
     allowed_params = [ :title, :author, :price, :description, :stock_quantity, :category_name ]
     filtered_params = params.slice(*allowed_params)
     book.update!(filtered_params)
-    raise ActiveRecord::RecordNotFound, "Book not found" if response.blank?
-    raise ActiveRecord::RecordInvalid, "Book update failed" unless response.valid?
+    raise BookErrors::RecordNotFound, "Book not found" if book.blank?
     book  # Return updated book object
   end
 
@@ -64,12 +63,9 @@ class BookService
     puts user_id
     book = self.get_book_by_id(params[:id])
 
-    # Check if the book exists
-    raise ActiveRecord::RecordNotFound, "Book not found" unless book
-
     # Check if the user is the vendor of the book
     unless book.vendor_id == user_id
-      raise StandardError, "User is not authorized to delete this book"
+      raise BookErrors::AccessDeniedError, "User is not authorized to delete this book"
     end
 
     # Remove the book's cache from Redis
@@ -81,51 +77,6 @@ class BookService
 
     # Attempt to destroy the book
     book.destroy!
-  end
-
-
-  def self.search_books_by_title(title)
-    # Searching for books by title
-    books = Book.where("title LIKE ?", "%#{title}%")
-    if books.empty?
-      raise "No books found with the title: #{title}"
-    end
-    books  # Return the list of books
-  rescue StandardError => e
-    raise "An error occurred: #{e.message}"
-  end
-
-  def self.search_books_by_author(author)
-    # Searching for books by author
-    books = Book.where("author LIKE ?", "%#{author}%")
-    if books.empty?
-      raise "No books found by the author: #{author}"
-    end
-    books  # Return the list of books
-  rescue StandardError => e
-    raise "An error occurred: #{e.message}"
-  end
-
-  def self.search_books_by_title_and_author(title, author)
-    # Searching for books by title and author
-    books = Book.where("title LIKE ? AND author LIKE ?", "%#{title}%", "%#{author}%")
-    if books.empty?
-      raise "No books found with the title: #{title} and author: #{author}"
-    end
-    books  # Return the list of books
-  rescue StandardError => e
-    raise "An error occurred: #{e.message}"
-  end
-
-  def self.search_books_by_category(category_name)
-    # Searching for books by category name
-    books = Book.where("category_name LIKE ?", "%#{category_name}%")
-    if books.empty?
-      raise "No books found in the category: #{category_name}"
-    end
-    books  # Return the list of books
-  rescue StandardError => e
-    raise "An error occurred: #{e.message}"
   end
 
   def self.search_books(params)

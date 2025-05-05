@@ -1,4 +1,4 @@
-# app/api/v1/carts_api.rb
+# app/api/v1/carts.rb
 module V1
   class Carts < Grape::API
     helpers AuthHelper
@@ -14,7 +14,6 @@ module V1
       end
       post do
         response = CartsService.add_item_to_cart(current_user.id, params)
-        raise ActiveRecord::RecordNotFound, "Unable to add item to cart" if response.blank?
         present :status, :success
         present :data, response
       end
@@ -25,7 +24,6 @@ module V1
       end
       get do
         response = CartsService.get_cart_items(current_user.id)
-        raise ActiveRecord::RecordNotFound, "No items found" if response.blank?
         present :status, :success
         present :data, response
       end
@@ -38,7 +36,9 @@ module V1
         requires :id, type: Integer, desc: "Cart Item ID"
       end
       delete do
-        CartsService.delete_cart_item(current_user.id, params)
+        response = CartsService.delete_cart_item(current_user.id, params)
+        present :status, :success
+        present :data, response
       end
 
       desc "Update an item in the cart"
@@ -51,14 +51,8 @@ module V1
       end
       patch do
         response = CartsService.update_cart_item(current_user.id, params)
-        if response
-          present :status, :success
-          present :data, response
-        else
-          error!({ status: :failed, message: "Unable to update cart item", error: "Update operation failed" }, 500)
-        end
-      rescue => e
-        error!({ status: :failed, message: "Unable to update cart item", error: e.message }, 409)
+        present :status, :success
+        present :data, response
       end
     end
   end
