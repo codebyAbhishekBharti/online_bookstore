@@ -69,7 +69,7 @@ RSpec.describe 'Auth API', type: :request do
         role: 'customer'
       )
     }
-    let(:token) { JsonWebToken.encode(user_id: user.id) }
+    let(:token) { JsonWebToken.encode(id: user.id, email: user.email, role: user.role) }
 
     it 'returns the current user details with valid token' do
       get '/api/v1/auth/me', headers: headers.merge('Authorization': "Bearer #{token}")
