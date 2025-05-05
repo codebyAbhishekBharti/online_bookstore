@@ -1,4 +1,4 @@
-require 'json_web_token'
+require "json_web_token"
 
 module V1
   class Auth < Grape::API
@@ -10,14 +10,8 @@ module V1
         requires :password, type: String, desc: "User password"
       end
       post :login do
-        user = User.find_by(email: params[:email])
-
-        if user && user.authenticate(params[:password])
-          token = JsonWebToken.encode({id: user.id, email: user.email,role: user.role})
-          { status: :success, token: token, user: { id: user.id, name: user.name, email: user.email, role: user.role } }
-        else
-          raise UnauthorizedError, "Invalid email or password"
-        end 
+        response = AuthService.login(params)
+        present({ status: "success", data: { token: response[:token], user: response[:user] } })
       end
 
       desc "Create User and return JWT token"
@@ -30,26 +24,17 @@ module V1
         requires :role, type: String, desc: "User role (e.g., admin, user)"
       end
       post :signup do
-        user = UserService.create_new_user(params)
-        if user && user.authenticate(user.password)
-          token = JsonWebToken.encode({id: user.id, email: user.email,role: user.role})
-          { status: :success, token: token, user: user }
-        else
-          raise ActiveRecord::RecordInvalid, "User creation failed"
-        end
+        response = AuthService.signup(params)
+        present({ status: "success", data: { token: response[:token], user: response[:user] } })
       end
 
       before do
         authenticate_user!
       end
       get :me do
-        user = User.find_by(id: current_user.id)
-        if user
+        user = UserService.get_user_by_id(current_user.id)
           present :status, :success
           present :data, user
-        else
-          raise ActiveRecord::RecordNotFound, "User not found"
-        end
       end
     end
   end

@@ -65,8 +65,6 @@ module V1
         end
         patch do
           response = BookService.update_book_details(current_user.id, params)
-          raise ActiveRecord::RecordNotFound, "Book not found" if response.blank?
-          raise ActiveRecord::RecordInvalid, "Book update failed" unless response.valid?
           present :status, :success
           present :data, response
         end

@@ -7,6 +7,7 @@ class BookService
     # Fetching all books from the database
     Book.all
   end
+
   def self.insert_new_book(user_id, params)
     # Extracting parameters
     title = params[:title]
@@ -15,7 +16,11 @@ class BookService
     description = params[:description]
     stock_quantity = params[:stock_quantity]
     category_name = params[:category_name]
-    # Creating a new book record
+    raise BookErrors::InvalidParametersError, "Title, author, price, description, stock quantity and category name are required" if title.blank? || author.blank? || price.blank? || description.blank? || stock_quantity.blank? || category_name.blank?
+
+    existing_book = Book.find_by(title: title, vendor_id: user_id)
+    raise BookErrors::BookAlreadyExistsError, "Book with this title already exists for this vendor" if existing_book
+
     book = Book.create!(
       title: title,
       author: author,
@@ -25,55 +30,43 @@ class BookService
       category_name: category_name,
       vendor_id: user_id
     )
-    
-    #invalidating redis search cache
+
+    # invalidating redis search cache
     invalidate_search_cache(book)
 
     book
   end
 
   def self.get_book_by_id(id)
-    # Finding the book by ID
     book = Book.find_by(id: id)
-    # Check if the book exists
-    raise "Book not found" unless book
-    book  # Return the book object
-  rescue ActiveRecord::RecordNotFound => e
-    raise "Book not found: #{e.message}"
-  rescue StandardError => e
-    raise "An error occurred: #{e.message}"
+    raise BookErrors::BookNotAvailableError, "Book not found" unless book
+    book
   end
 
   def self.update_book_details(user_id, params)
-    # Finding the book by ID
     book = self.get_book_by_id(params[:id])
-    # Check if the book exists
-    raise "Book not found" unless book
+
     # check if user is vendor of that book
     if book.vendor_id != user_id
-      raise "User is not authorized to update this book"
+      raise BookErrors::AccessDeniedError, "User is not authorized to update this book"
     end
     # Updating book details
     allowed_params = [ :title, :author, :price, :description, :stock_quantity, :category_name ]
     filtered_params = params.slice(*allowed_params)
     book.update!(filtered_params)
+    raise ActiveRecord::RecordNotFound, "Book not found" if response.blank?
+    raise ActiveRecord::RecordInvalid, "Book update failed" unless response.valid?
     book  # Return updated book object
-  rescue ActiveRecord::RecordNotFound => e
-    raise "Book not found: #{e.message}"
-  rescue ActiveRecord::RecordInvalid => e
-    raise "Failed to update book: #{e.message}"
-  rescue StandardError => e
-    raise "An error occurred: #{e.message}"
   end
 
   def self.delete_book(user_id, params)
     # Find the book by ID
     puts user_id
     book = self.get_book_by_id(params[:id])
-  
+
     # Check if the book exists
     raise ActiveRecord::RecordNotFound, "Book not found" unless book
-  
+
     # Check if the user is the vendor of the book
     unless book.vendor_id == user_id
       raise StandardError, "User is not authorized to delete this book"
@@ -89,7 +82,7 @@ class BookService
     # Attempt to destroy the book
     book.destroy!
   end
-  
+
 
   def self.search_books_by_title(title)
     # Searching for books by title
@@ -139,16 +132,16 @@ class BookService
     title    = params[:title].to_s.downcase.strip
     author   = params[:author].to_s.downcase.strip
     category = params[:category].to_s.downcase.strip
-  
+
     # Generate a unique cache key based on search parameters
     cache_key = search_cache_key(title: title, author: author, category: category)
-  
+
     Rails.cache.fetch(cache_key, expires_in: 30.minutes) do
       books = Book.all
       books = books.where("title ILIKE ?", "%#{title}%") if title.present?
       books = books.where("author ILIKE ?", "%#{author}%") if author.present?
       books = books.where("category_name ILIKE ?", "%#{category}%") if category.present?
-      
+
       books.to_a
     end
   end
@@ -166,15 +159,15 @@ class BookService
       { author: book.author },
       { category: book.category_name }
     ]
-  
+
     search_params.each do |params|
-      cache_key = search_cache_key(title: params[:title], author: params[:author],category: params[:category])
+      cache_key = search_cache_key(title: params[:title], author: params[:author], category: params[:category])
       Rails.cache.delete(cache_key)
     end
   end
-  
 
-  def self.search_cache_key(title: '', author: '', category: '')
+
+  def self.search_cache_key(title: "", author: "", category: "")
     normalized = [
       title.to_s.downcase.strip,
       author.to_s.downcase.strip,
