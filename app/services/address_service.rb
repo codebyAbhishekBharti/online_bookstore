@@ -41,12 +41,15 @@ class AddressService
 
   def self.delete_address(user_id, address_id)
     address = self.get_address(address_id)
-    raise AddressErrors::UnauthorizedAccessError unless address.user_id == user_id
-
+    raise AddressErrors::UnauthorizedAccessError if address.user_id != user_id
     address.destroy
-  rescue => e
-    raise AddressErrors::AddressOperationFailedError, e.message
+  rescue ActiveRecord::RecordNotFound => e
+    raise AddressErrors::AddressNotFoundError, e.message
+  rescue StandardError => e
+    raise AddressErrors::AddressOperationFailedError, e.message unless e.is_a?(AddressErrors::BaseError)
+    raise
   end
+  
 
   def self.get_address(address_id)
     address = Address.find_by(id: address_id)

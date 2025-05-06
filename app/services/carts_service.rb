@@ -31,15 +31,18 @@ class CartsService
   def self.delete_cart_item(user_id, params)
     cart_item_id = params[:id]
     raise CartErrors::MissingParameterError, "Cart Item ID is required" unless cart_item_id
-
+  
     cart_item = Cart.find_by(id: cart_item_id, user_id: user_id)
-    raise CartErrors::CartItemNotFoundError unless cart_item
-
+    raise CartErrors::CartItemNotFoundError, "Cart item not found" unless cart_item
+  
     cart_item.destroy
     cart_item
+  rescue CartErrors::CartItemNotFoundError => e
+    raise e  # Re-raise the specific error
   rescue => e
-    raise CartErrors::CartOperationFailedError, e.message
+    raise CartErrors::CartOperationFailedError, e.message  # Generic error handling
   end
+  
 
   def self.update_cart_item(user_id, params)
     cart_item_id = params[:id]

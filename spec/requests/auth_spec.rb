@@ -17,8 +17,8 @@ RSpec.describe 'Auth API', type: :request do
       expect(response).to have_http_status(:success)
       json = JSON.parse(response.body)
       expect(json['status']).to eq('success')
-      expect(json['token']).to be_present
-      expect(json['user']['email']).to eq('john@example.com')
+      expect(json['data']['token']).to be_present
+      expect(json['data']['user']['email']).to eq('john@example.com')
     end
   end
 
@@ -43,7 +43,7 @@ RSpec.describe 'Auth API', type: :request do
       expect(response).to have_http_status(:success)
       json = JSON.parse(response.body)
       expect(json['status']).to eq('success')
-      expect(json['token']).to be_present
+      expect(json['data']['token']).to be_present
     end
 
     it 'rejects invalid credentials' do
